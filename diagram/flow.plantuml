@@ -1,0 +1,58 @@
+@startuml
+!include <logos/mariadb>
+!include <awslib/AWSSimplified>
+
+<style>
+componentDiagram {
+  BackGroundColor white
+  LineThickness 1
+  LineColor #333333
+}
+document {
+  BackGroundColor white
+}
+</style>
+
+' skinparam monochrome true
+skinparam defaulttextalignment center
+
+skinparam sequence {
+    ArrowColor #333333
+}
+
+skinparam rectangle {
+    RoundCorner<< round20 >> 20
+    RoundCorner<< round30 >> 30
+    RoundCorner<< round40 >> 40
+    RoundCorner<< round50 >> 50
+}
+
+database "<$mariadb>\n**Database**\n//example.(primary,secondary,tertiary)//" as database #f5d0c4
+
+rectangle "Maxwell\n**primary**\n//(exclude:*.*,include:example.primary)//" as maxwellprimary #d4e0b6
+rectangle "Maxwell\n**secondary**\n//(exclude:*.*,include:example.secondary)//" as maxwellsecondary #d4e0b6
+rectangle "Maxwell\n**tertiary**\n//(exclude:*.*,include:example.tertiary)//" as maxwelltertiary #d4e0b6
+
+rectangle "Destination\n**primary**\n//(a destination for the primary table events)//" as destinationprimary <<round20>> #8abded
+rectangle "Destination\n**secondary**\n//(a destination for the secondary table events)//" as destinationsecondary <<round20>> #8abded
+rectangle "Destination\n**tertiary**\n//(a destination for the tertiary table events)//" as destinationtertiary <<round20>> #8abded
+
+rectangle "AWS SQS" as sqs #d4e0b6 {
+queue "Maxwell Queue\n**maxwell-primary-queue**\n//(maxwell-primary)//" as maxwellprimaryqueue #8cc97b
+queue "Maxwell Queue\n**maxwell-secondary-queue**\n//(maxwell-primary)//" as maxwellsecondaryqueue #8cc97b
+queue "Maxwell Queue\n**maxwell-tertiary-queue**\n//(maxwell-tertiary)//" as maxwelltertiaryqueue #8cc97b
+}
+
+database -down-> maxwellprimary
+database -down-> maxwellsecondary
+database -down-> maxwelltertiary
+
+maxwellprimary -down-> maxwellprimaryqueue
+maxwellsecondary -down-> maxwellsecondaryqueue
+maxwelltertiary -down-> maxwelltertiaryqueue
+
+maxwellprimaryqueue -down-> destinationprimary
+maxwellsecondaryqueue -down-> destinationsecondary
+maxwelltertiaryqueue -down-> destinationtertiary
+
+@enduml

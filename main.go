@@ -1,0 +1,151 @@
+package main
+
+import (
+	"database/sql"
+	"flag"
+	"fmt"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/krzysztofzaucha/maxwell-sandbox/internal"
+	"os"
+	"plugin"
+	"strings"
+	"time"
+)
+
+const (
+	retries int = 3
+)
+
+func main() {
+	help := flag.Bool("help", false, "print help")
+	configFilePath := flag.String("config", "config.json", "configuration file (e.g. config.json)")
+	module := flag.String("module", "", "module to be used (e.g. producer, consumer, etc...)")
+	threads := flag.Int("threads", 1, "number of concurrent threads to run")
+	delay := flag.Int("delay", 1, "wait time between each step in milliseconds")
+	name := flag.String("name", "", "source events name")
+	total := flag.Int("total", 100, "total events to be produced")
+
+	flag.Parse()
+
+	// print help
+	if *help == true {
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
+
+	// load configuration
+	config, err := internal.LoadConfig(*configFilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	// ensure module is provided, if not print help
+	if *module == "" {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	// generate plugin name
+	symbol := strings.ReplaceAll(strings.Title(strings.ReplaceAll(*module, "-", " ")), " ", "")
+
+	// locate and load the plugin
+	plug, err := plugin.Open("bin/" + *module + ".so")
+	if err != nil {
+		panic(err)
+	}
+
+	symName, err := plug.Lookup(symbol)
+	if err != nil {
+		panic(err)
+	}
+
+	// configure MariaDB
+	if _, ok := symName.(internal.SQLDBConfigurator); ok {
+		err = symName.(internal.SQLDBConfigurator).WithSQLDB(getDB(config.MariaDB))
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// configure SQS
+	if _, ok := symName.(internal.SQSConfigurator); ok {
+		symName.(internal.SQSConfigurator).WithSQS(getSQS())
+	}
+
+	// configure threads
+	if _, ok := symName.(internal.ThreadsConfigurator); ok {
+		symName.(internal.ThreadsConfigurator).WithThreads(*threads)
+	}
+
+	// configure threads
+	if _, ok := symName.(internal.DelayConfigurator); ok {
+		symName.(internal.DelayConfigurator).WithDelay(*delay)
+	}
+
+	// configure name
+	if _, ok := symName.(internal.NameConfigurator); ok {
+		symName.(internal.NameConfigurator).WithName(*name)
+	}
+
+	// configure amount
+	if _, ok := symName.(internal.AmountConfigurator); ok {
+		symName.(internal.AmountConfigurator).WithAmount(*total)
+	}
+
+	// execute plugin logic
+	var executor internal.Executor
+
+	executor, ok := symName.(internal.Executor)
+	if !ok {
+		panic("plugin is not an executor")
+	}
+
+	err = executor.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func getDB(config internal.MariaDB) *sql.DB {
+	var db *sql.DB
+	var err error
+
+	for i:=0; i<retries; i++ {
+		fmt.Printf("connecting to the database, attempt number %d\n", i)
+
+		db, err = sql.Open("mysql", fmt.Sprintf(
+			//[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
+			"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true",
+			config.Username,
+			config.Password,
+			config.Host,
+			config.Port,
+			config.Name,
+		))
+
+		if err != nil {
+			fmt.Printf("%v: waiting to reconnect...\n", err)
+
+			time.Sleep(time.Duration(3)*time.Second)
+
+			continue
+		}
+
+		break
+	}
+
+	if db == nil {
+		panic("unable to connect to the database")
+	}
+
+	return db
+}
+
+func getSQS() *sqs.SQS {
+	sess := session.Must(session.NewSession())
+
+	q := sqs.New(sess)
+
+	return q
+}

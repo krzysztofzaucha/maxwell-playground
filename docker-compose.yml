@@ -1,0 +1,124 @@
+version: "3.9"
+
+services:
+  mariadb:
+    build:
+      context: .
+      dockerfile: mariadb/Dockerfile
+    image: ${IMAGE_BASE_NAME}-mariadb:latest
+    container_name: ${BASE_NAME}-mariadb
+    environment:
+      - "MYSQL_ROOT_PASSWORD=password"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - "./sql/init.sql:/docker-entrypoint-initdb.d/init.sql"
+      - "./sql/insert-primary.sql:/mnt/insert-primary.sql"
+      - "./sql/insert-secondary.sql:/mnt/insert-secondary.sql"
+      - "./sql/insert-tertiary.sql:/mnt/insert-tertiary.sql"
+      - "mariadb-data:/var/lib/mysql"
+    restart: always
+
+  localstack:
+    image: localstack/localstack:latest
+    #ports:
+    #  - "4567-4584:4567-4584"
+    #  - "12000:8080"
+    container_name: ${BASE_NAME}-localstack
+    environment:
+      - "SERVICES=sqs"
+      - "DEBUG=true"
+      - "DOCKER_HOST=unix:///var/run/docker.sock"
+      - "DEFAULT_REGION=eu-west-1"
+      - "HOSTNAME=${BASE_NAME}-localstack"
+      - "HOSTNAME_EXTERNAL=${BASE_NAME}-localstack"
+      # For aws cli
+      - "AWS_ACCESS_KEY_ID=dummy"
+      - "AWS_SECRET_ACCESS_KEY=dummy"
+      - "AWS_REGION=eu-west-1"
+      # Maxwell specific env
+      - "SQS_QUEUE_NAMES=maxwell-primary,maxwell-secondary,maxwell-tertiary"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./sh/localstack.sh:/docker-entrypoint-initaws.d/localstack.sh
+
+  maxwell-primary:
+    build:
+      context: .
+      dockerfile: maxwell/Dockerfile
+    image: ${IMAGE_BASE_NAME}-maxwell:latest
+    container_name: ${BASE_NAME}-maxwell-primary
+    depends_on:
+      - mariadb
+      - localstack
+    environment:
+      - "HOST=${BASE_NAME}-mariadb"
+      - "PORT=3306"
+      - "USERNAME=maxwell"
+      - "PASSWORD=password"
+      - "PRODUCER=sqs"
+      - "REPLICA_SERVER_ID=1"
+      - "SERVER_ID=primary"
+      - "FILTER=exclude:*.*,include:example.primary"
+      - "ENDPOINT_URL=http://${BASE_NAME}-localstack:4566"
+      - "SQS_QUEUE_URI=http://${BASE_NAME}-localstack:4566/000000000000/maxwell-primary"
+      # For aws cli
+      - "AWS_ACCESS_KEY_ID=dummy"
+      - "AWS_SECRET_ACCESS_KEY=dummy"
+      - "AWS_REGION=eu-west-1"
+
+  maxwell-secondary:
+    build:
+      context: .
+      dockerfile: maxwell/Dockerfile
+    image: ${IMAGE_BASE_NAME}-maxwell:latest
+    container_name: ${BASE_NAME}-maxwell-secondary
+    depends_on:
+      - mariadb
+      - localstack
+    environment:
+      - "HOST=${BASE_NAME}-mariadb"
+      - "PORT=3306"
+      - "USERNAME=maxwell"
+      - "PASSWORD=password"
+      - "PRODUCER=sqs"
+      - "REPLICA_SERVER_ID=2"
+      - "SERVER_ID=secondary"
+      - "FILTER=exclude:*.*,include:example.secondary"
+      - "ENDPOINT_URL=http://${BASE_NAME}-localstack:4566"
+      - "SQS_QUEUE_URI=http://${BASE_NAME}-localstack:4566/000000000000/maxwell-secondary"
+      # For aws cli
+      - "AWS_ACCESS_KEY_ID=dummy"
+      - "AWS_SECRET_ACCESS_KEY=dummy"
+      - "AWS_REGION=eu-west-1"
+
+  maxwell-tertiary:
+    build:
+      context: .
+      dockerfile: maxwell/Dockerfile
+    image: ${IMAGE_BASE_NAME}-maxwell:latest
+    container_name: ${BASE_NAME}-maxwell-tertiary
+    depends_on:
+      - mariadb
+      - localstack
+    environment:
+      - "HOST=${BASE_NAME}-mariadb"
+      - "PORT=3306"
+      - "USERNAME=maxwell"
+      - "PASSWORD=password"
+      - "PRODUCER=sqs"
+      - "REPLICA_SERVER_ID=3"
+      - "SERVER_ID=tertiary"
+      - "FILTER=exclude:*.*,include:example.tertiary"
+      - "ENDPOINT_URL=http://${BASE_NAME}-localstack:4566"
+      - "SQS_QUEUE_URI=http://${BASE_NAME}-localstack:4566/000000000000/maxwell-tertiary"
+      # For aws cli
+      - "AWS_ACCESS_KEY_ID=dummy"
+      - "AWS_SECRET_ACCESS_KEY=dummy"
+      - "AWS_REGION=eu-west-1"
+
+volumes:
+  mariadb-data:
+
+networks:
+  default:
+    name: ${NETWORK}

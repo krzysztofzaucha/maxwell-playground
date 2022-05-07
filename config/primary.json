@@ -1,0 +1,14 @@
+{
+  "name": "primary",
+  "amount": 1000,
+  "mariaDB": {
+    "host": "maxwell-sandbox-mariadb",
+    "port": 3306,
+    "username": "root",
+    "password": "password",
+    "name": "example"
+  },
+  "sqs": {
+    "queueURL": "http://maxwell-sandbox-localstack:4566/000000000000/maxwell-primary"
+  }
+}

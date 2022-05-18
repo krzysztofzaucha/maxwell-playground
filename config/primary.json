@@ -1,6 +1,4 @@
 {
-  "name": "primary",
-  "amount": 1000,
   "mariaDB": {
     "host": "maxwell-sandbox-mariadb",
     "port": 3306,
@@ -9,6 +7,10 @@
     "name": "example"
   },
   "sqs": {
+    "region": "eu-west-1",
+    "endpointURL": "http://maxwell-sandbox-localstack:4566",
+    "accessKey" : "dummy",
+    "secretAccessKey": "dummy",
     "queueURL": "http://maxwell-sandbox-localstack:4566/000000000000/maxwell-primary"
   }
 }

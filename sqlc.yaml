@@ -3,5 +3,5 @@ packages:
   - path: "internal/repository"
     name: "repository"
     engine: "mysql"
-    schema: "sqlc/schema.sql"
+    schema: "sql/schema.sql"
     queries: "sqlc/query.sql"

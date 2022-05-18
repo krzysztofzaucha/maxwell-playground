@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  producer-tertiary:
+    build:
+      context: ../
+      dockerfile: go/Dockerfile
+      target: final
+    image: ${IMAGE_BASE_NAME}-go:latest
+    container_name: ${BASE_NAME}-producer-tertiary
+    depends_on:
+      - mariadb
+    volumes:
+      - "../config/tertiary.json:/opt/app/config.json"
+    command: --config=config.json --module=producer --threads=${PRODUCER_THREADS} --wait=${PRODUCER_WAIT} --name=tertiary --total=${TOTAL}
+
+networks:
+  default:
+    name: ${NETWORK}

@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  mariadb:
+    build:
+      context: ../mariadb
+      dockerfile: Dockerfile
+    image: ${IMAGE_BASE_NAME}-mariadb:latest
+    container_name: ${BASE_NAME}-mariadb
+    environment:
+      - "MYSQL_ROOT_PASSWORD=password"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - "../sql/init.sql:/docker-entrypoint-initdb.d/00-init.sql"
+      - "../sql/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql"
+      - "../sql/insert-primary.sql:/mnt/20-insert-primary.sql"
+      - "../sql/insert-secondary.sql:/mnt/20-insert-secondary.sql"
+      - "../sql/insert-tertiary.sql:/mnt/20-insert-tertiary.sql"
+      - "mariadb-data:/var/lib/mysql"
+    restart: always
+
+volumes:
+  mariadb-data:
+
+networks:
+  default:
+    name: ${NETWORK}

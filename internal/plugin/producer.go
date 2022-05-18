@@ -7,20 +7,22 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal/repository"
 	"github.com/pkg/errors"
-	"runtime"
 	"sync"
 	"time"
 )
 
+// Producer is a producer plugin symbol name.
+var Producer producer
+
 var errProducerPlugin = errors.New("consumer")
 
 type producer struct {
-	db   *sql.DB
-	q    *repository.Queries
+	db      *sql.DB
+	q       *repository.Queries
 	threads int
-	delay int
-	name string
-	amount int
+	wait    int
+	name    string
+	amount  int
 }
 
 func (p *producer) WithSQLDB(db *sql.DB) error {
@@ -35,8 +37,8 @@ func (p *producer) WithThreads(threads int) {
 	p.threads = threads
 }
 
-func (p *producer) WithDelay(delay int) {
-	p.delay = delay
+func (p *producer) WithWait(wait int) {
+	p.wait = wait
 }
 
 func (p *producer) WithName(name string) {
@@ -49,14 +51,12 @@ func (p *producer) WithAmount(amount int) {
 
 // Execute method executes plugin logic.
 func (p *producer) Execute() error {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
 	rc := make(chan string)
 	sem := make(chan bool, p.threads)
 
 	start := time.Now()
 
-	go p.run(time.Duration(p.delay)*time.Millisecond, rc, sem)
+	go p.run(time.Duration(p.wait)*time.Millisecond, rc, sem)
 
 	conns := p.getResult(rc)
 
@@ -67,7 +67,7 @@ func (p *producer) Execute() error {
 	return nil
 }
 
-func (p *producer) run(delay time.Duration, rc chan string, sem chan bool) {
+func (p *producer) run(wait time.Duration, rc chan string, sem chan bool) {
 	var wg sync.WaitGroup
 
 	amount := p.amount
@@ -78,7 +78,7 @@ func (p *producer) run(delay time.Duration, rc chan string, sem chan bool) {
 	defer close(sem)
 
 	for amount > 0 {
-		counter:=(0-amount)+p.amount+1
+		counter := (0 - amount) + p.amount + 1
 
 		select {
 		case sem <- true:
@@ -92,7 +92,7 @@ func (p *producer) run(delay time.Duration, rc chan string, sem chan bool) {
 					fmt.Printf("%v", err)
 				}
 
-				time.Sleep(delay)
+				time.Sleep(wait)
 
 				rc <- res
 				<-sem
@@ -155,6 +155,3 @@ func (p *producer) getResult(rc chan string) int {
 		}
 	}
 }
-
-// Producer is a producer plugin symbol name.
-var Producer producer

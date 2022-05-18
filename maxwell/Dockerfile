@@ -19,16 +19,16 @@ RUN apt-get update \
 
 CMD bin/maxwell --user=${MYSQL_USER} --password=MYSQL_PASSWORD --host=${MYSQL_HOST}-mariadb --producer=stdout
 
-ADD maxwell/config.properties /app/config.properties
-ADD maxwell/lib/aws-java-sdk-core-1.12.213.jar /app/lib/aws-java-sdk-core-1.12.213.jar
-ADD maxwell/lib/aws-java-sdk-sqs-1.12.213.jar /app/lib/aws-java-sdk-sqs-1.12.213.jar
-ADD maxwell/lib/maxwell-1.37.5.jar /app/lib/maxwell-1.37.5.jar
-ADD maxwell/entrypoint.sh /entrypoint.sh
+ADD config.properties /app/config.properties
+ADD lib/aws-java-sdk-core-1.12.213.jar /app/lib/aws-java-sdk-core-1.12.213.jar
+ADD lib/aws-java-sdk-sqs-1.12.213.jar /app/lib/aws-java-sdk-sqs-1.12.213.jar
+ADD lib/maxwell-1.37.5.jar /app/lib/maxwell-1.37.5.jar
+ADD entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
 USER 1000
 
-ADD maxwell/.aws /app/.aws
+ADD .aws /app/.aws
 
 ENTRYPOINT /entrypoint.sh

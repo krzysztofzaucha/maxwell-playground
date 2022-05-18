@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  consumer-tertiary:
+    build:
+      context: ../
+      dockerfile: go/Dockerfile
+      target: final
+    image: ${IMAGE_BASE_NAME}-go:latest
+    container_name: ${BASE_NAME}-consumer-tertiary
+    depends_on:
+      - localstack
+    volumes:
+      - "../config/tertiary.json:/opt/app/config.json"
+    command: --config=config.json --module=consumer --threads=${CONSUMER_THREADS} --wait=${CONSUMER_WAIT}
+
+networks:
+  default:
+    name: ${NETWORK}

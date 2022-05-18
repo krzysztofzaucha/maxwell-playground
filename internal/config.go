@@ -8,11 +8,18 @@ type MariaDB struct {
 	Name     string `json:"name"`
 }
 
+type SQS struct {
+	Region          string   `json:"region"`
+	EndpointURL     string   `json:"endpointURL"`
+	AccessKey       string   `json:"accessKey"`
+	SecretAccessKey string   `json:"secretAccessKey"`
+	Token           string   `json:"token"`
+	QueueURL        QueueURL `json:"queueURL"`
+}
+
 type QueueURL string
 
 type Config struct {
 	MariaDB MariaDB `json:"mariaDB"`
-	SQS     struct {
-		QueueURL QueueURL `json:"queueURL"`
-	} `json:"sqs"`
+	SQS     SQS     `json:"sqs"`
 }

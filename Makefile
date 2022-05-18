@@ -4,9 +4,11 @@ export SHELL:=/bin/bash
 export BASE_NAME:=$(shell basename ${PWD})
 export IMAGE_BASE_NAME:=kz/$(shell basename ${PWD})
 export NETWORK:=${BASE_NAME}-network
-export THREADS:=1 # number of threads
-export DELAY:=1000 # step waiting time
-export TOTAL:=100 # number of inserts
+export PRODUCER_THREADS:=1 # number of threads
+export CONSUMER_THREADS:=1 # number of threads
+export PRODUCER_WAIT:=5000 # step waiting time in milliseconds
+export CONSUMER_WAIT:=100 # step waiting time in milliseconds
+export TOTAL:=10000 # number of events per events type
 
 default: help
 
@@ -19,13 +21,45 @@ help: ## Prints help for targets with comments
 # Run #
 #######
 
+ALL:=\
+	-f docker-compose/mariadb.yml \
+	-f docker-compose/localstack.yml \
+	-f docker-compose/maxwell-primary.yml \
+	-f docker-compose/maxwell-secondary.yml \
+	-f docker-compose/maxwell-tertiary.yml \
+	-f docker-compose/producer-primary.yml \
+	-f docker-compose/producer-secondary.yml \
+	-f docker-compose/producer-tertiary.yml \
+	-f docker-compose/consumer-primary.yml \
+	-f docker-compose/consumer-secondary.yml \
+	-f docker-compose/consumer-tertiary.yml
+
 compose:
 	@docker-compose ${COMPOSE} \
 		-p ${BASE_NAME} \
-		up --build --force-recreate --remove-orphans # --abort-on-container-exit
+		up --build # --remove-orphans # --force-recreate # --abort-on-container-exit
 
 up: ## Start the example
-	@COMPOSE=" -f docker-compose.yml" make compose
+	@COMPOSE=${ALL} make compose
+
+###########
+# Testing #
+###########
+
+mariadb-up: ## Start MariaDB
+	@COMPOSE=" -f docker-compose/mariadb.yml" make compose
+
+localstack-up: ## Start Localstack
+	@COMPOSE=" -f docker-compose/localstack.yml" make compose
+
+maxwell-primary-up: ## Start Maxwell Primary
+	@COMPOSE=" -f docker-compose/maxwell-primary.yml" make compose
+
+producer-primary-up: ## Start Producer Primary
+	@COMPOSE=" -f docker-compose/producer-primary.yml" make compose
+
+consumer-primary-up: ## Start Consumer Primary
+	@COMPOSE=" -f docker-compose/consumer-primary.yml" make compose
 
 ###########
 # MariaDB #
@@ -61,7 +95,7 @@ plugins: ## Builds plugins
 	@go build -buildmode=plugin -o bin/producer.so internal/plugin/producer.go
 	@go build -buildmode=plugin -o bin/consumer.so internal/plugin/consumer.go
 
-build: ## Compile
+build: plugins ## Compile
 	@go build -o bin/app .
 
 #######
@@ -121,4 +155,5 @@ reset: ## Cleanup
 	@docker stop $(shell docker ps -aq) || true
 	@docker system prune || true
 	@docker volume rm $(shell docker volume ls -q) || true
-	@podman rmi -f ${IMAGE_BASE_NAME}-maxwell:latest || true
+	@docker rmi -f ${IMAGE_BASE_NAME}-maxwell:latest || true
+	@docker rmi -f ${IMAGE_BASE_NAME}-go:latest || true

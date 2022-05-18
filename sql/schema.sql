@@ -1,3 +1,5 @@
+USE `example`;
+
 CREATE TABLE `primary`
 (
     `id`      int(11) NOT NULL AUTO_INCREMENT,

@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  maxwell-secondary:
+    build:
+      context: ../maxwell
+      dockerfile: Dockerfile
+    image: ${IMAGE_BASE_NAME}-maxwell:latest
+    container_name: ${BASE_NAME}-maxwell-secondary
+    depends_on:
+      - mariadb
+      - localstack
+    environment:
+      - "HOST=${BASE_NAME}-mariadb"
+      - "PORT=3306"
+      - "USERNAME=maxwell"
+      - "PASSWORD=password"
+      - "PRODUCER=sqs"
+      - "REPLICA_SERVER_ID=2"
+      - "SERVER_ID=secondary"
+      - "FILTER=exclude:*.*,include:example.secondary"
+      - "ENDPOINT_URL=http://${BASE_NAME}-localstack:4566"
+      - "SQS_QUEUE_URI=http://${BASE_NAME}-localstack:4566/000000000000/maxwell-secondary"
+      # For aws cli
+      - "AWS_ACCESS_KEY_ID=dummy"
+      - "AWS_SECRET_ACCESS_KEY=dummy"
+      - "AWS_REGION=eu-west-1"
+
+networks:
+  default:
+    name: ${NETWORK}

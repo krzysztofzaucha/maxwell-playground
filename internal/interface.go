@@ -23,12 +23,12 @@ type SQSConfigurator interface {
 
 // ThreadsConfigurator is an interface for WithThreads.
 type ThreadsConfigurator interface {
-	WithThreads(name int)
+	WithThreads(threads int)
 }
 
-// DelayConfigurator is an interface for WithDelay.
-type DelayConfigurator interface {
-	WithDelay(name int)
+// WaitConfigurator is an interface for WithWait.
+type WaitConfigurator interface {
+	WithWait(wait int)
 }
 
 // NameConfigurator is an interface for WithName.
@@ -38,10 +38,10 @@ type NameConfigurator interface {
 
 // AmountConfigurator is an interface for WithAmount.
 type AmountConfigurator interface {
-	WithAmount(name int)
+	WithAmount(amount int)
 }
 
 // SQSQueueURLConfigurator is an interface for WithSQSQueueURL.
 type SQSQueueURLConfigurator interface {
-	WithSQSQueueURL(queue string)
+	WithSQSQueueURL(queue QueueURL)
 }

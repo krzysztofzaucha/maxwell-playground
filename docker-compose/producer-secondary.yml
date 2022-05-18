@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  producer-secondary:
+    build:
+      context: ../
+      dockerfile: go/Dockerfile
+      target: final
+    image: ${IMAGE_BASE_NAME}-go:latest
+    container_name: ${BASE_NAME}-producer-secondary
+    depends_on:
+      - mariadb
+    volumes:
+      - "../config/secondary.json:/opt/app/config.json"
+    command: --config=config.json --module=producer --threads=${PRODUCER_THREADS} --wait=${PRODUCER_WAIT} --name=secondary --total=${TOTAL}
+
+networks:
+  default:
+    name: ${NETWORK}

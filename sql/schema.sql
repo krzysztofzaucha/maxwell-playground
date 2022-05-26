@@ -36,6 +36,7 @@ CREATE TABLE `destination`
     `source_id`   int(11)     NOT NULL,
     `source_name` varchar(62) NOT NULL,
     `value`       varchar(62) NOT NULL,
+    `added_at`    datetime not null default NOW(),
     PRIMARY KEY (`id`),
     UNIQUE KEY (`source_id`, `source_name`)
 ) ENGINE = InnoDB

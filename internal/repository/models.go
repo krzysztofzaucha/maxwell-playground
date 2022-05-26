@@ -4,11 +4,16 @@
 
 package repository
 
+import (
+	"time"
+)
+
 type Destination struct {
 	ID         int32
 	SourceID   int32
 	SourceName string
 	Value      string
+	AddedAt    time.Time
 }
 
 type Primary struct {

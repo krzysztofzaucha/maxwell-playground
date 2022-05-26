@@ -1,21 +1,39 @@
 package main
 
 import (
+	"context"
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal"
+	"github.com/krzysztofzaucha/maxwell-sandbox/internal/repository"
+	"github.com/pkg/errors"
 	"time"
 )
 
 // Consumer is a consumer plugin symbol name.
 var Consumer consumer
 
+var errConsumerPlugin = errors.New("consumer")
+
 type consumer struct {
+	db       *sql.DB
+	q        *repository.Queries
 	sqs      *sqs.SQS
 	threads  int
 	wait     int
 	queueURL string
+}
+
+func (c *consumer) WithSQLDB(db *sql.DB) error {
+	c.db = db
+
+	c.q = repository.New(db)
+
+	return nil
 }
 
 func (c *consumer) WithSQS(sqs *sqs.SQS) {
@@ -87,7 +105,14 @@ func (c *consumer) run(delay time.Duration, sem chan bool) {
 					return
 				}
 
-				c.process(messages.Messages[0])
+				err = c.process(messages.Messages[0])
+				if err != nil {
+					fmt.Printf("%v", err)
+
+					<-sem
+
+					return
+				}
 
 				time.Sleep(delay)
 
@@ -97,16 +122,46 @@ func (c *consumer) run(delay time.Duration, sem chan bool) {
 	}
 }
 
-func (c *consumer) process(message *sqs.Message) {
-	fmt.Println(*message.Body)
+func (c *consumer) process(message *sqs.Message) error {
+	ctx := context.Background()
+
+	var msg map[string]interface{}
+
+	err := json.Unmarshal([]byte(*message.Body), &msg)
+	if err != nil {
+		return errors.Wrapf(errConsumerPlugin, "%s", err)
+	}
+
+	data := msg["data"].(map[string]interface{})
+
+	result, err := c.q.SaveDestination(ctx, repository.SaveDestinationParams{
+		SourceID:   int32(data["id"].(float64)),
+		SourceName: data["name"].(string),
+		Value:      data["value"].(string),
+	})
+	if err != nil {
+		return errors.Wrapf(errConsumerPlugin, "%s", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return errors.Wrapf(errConsumerPlugin, "%s", err)
+	}
+
+	fmt.Printf(
+		"message has been successfully processed: %s, stored in the destination with id %d\n",
+		*message.Body, id,
+	)
 
 	params := &sqs.DeleteMessageInput{
 		QueueUrl:      aws.String(c.queueURL),
 		ReceiptHandle: aws.String(*message.ReceiptHandle),
 	}
 
-	_, err := c.sqs.DeleteMessage(params)
+	_, err = c.sqs.DeleteMessage(params)
 	if err != nil {
 		fmt.Printf("unable to proccess sqs message: %v\n", err)
 	}
+
+	return nil
 }

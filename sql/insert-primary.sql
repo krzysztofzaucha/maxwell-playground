@@ -1,1 +1,2 @@
-INSERT INTO `primary`(`value`) VALUES ("Hello World!");
+INSERT INTO `primary`(`name`, `value`)
+VALUES ("primary", "Hello World!");

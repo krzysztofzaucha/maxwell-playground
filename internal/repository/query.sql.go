@@ -11,28 +11,58 @@ import (
 )
 
 const createPrimary = `-- name: CreatePrimary :execresult
-INSERT INTO ` + "`" + `primary` + "`" + ` (` + "`" + `value` + "`" + `)
-VALUES (?)
+INSERT INTO ` + "`" + `primary` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `value` + "`" + `)
+VALUES (?, ?)
 `
 
-func (q *Queries) CreatePrimary(ctx context.Context, value sql.NullString) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createPrimary, value)
+type CreatePrimaryParams struct {
+	Name  string
+	Value string
+}
+
+func (q *Queries) CreatePrimary(ctx context.Context, arg CreatePrimaryParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createPrimary, arg.Name, arg.Value)
 }
 
 const createSecondary = `-- name: CreateSecondary :execresult
-INSERT INTO ` + "`" + `secondary` + "`" + ` (` + "`" + `value` + "`" + `)
-VALUES (?)
+INSERT INTO ` + "`" + `secondary` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `value` + "`" + `)
+VALUES (?, ?)
 `
 
-func (q *Queries) CreateSecondary(ctx context.Context, value sql.NullString) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createSecondary, value)
+type CreateSecondaryParams struct {
+	Name  string
+	Value string
+}
+
+func (q *Queries) CreateSecondary(ctx context.Context, arg CreateSecondaryParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createSecondary, arg.Name, arg.Value)
 }
 
 const createTertiary = `-- name: CreateTertiary :execresult
-INSERT INTO ` + "`" + `tertiary` + "`" + ` (` + "`" + `value` + "`" + `)
-VALUES (?)
+INSERT INTO ` + "`" + `tertiary` + "`" + ` (` + "`" + `name` + "`" + `, ` + "`" + `value` + "`" + `)
+VALUES (?, ?)
 `
 
-func (q *Queries) CreateTertiary(ctx context.Context, value sql.NullString) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createTertiary, value)
+type CreateTertiaryParams struct {
+	Name  string
+	Value string
+}
+
+func (q *Queries) CreateTertiary(ctx context.Context, arg CreateTertiaryParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createTertiary, arg.Name, arg.Value)
+}
+
+const saveDestination = `-- name: SaveDestination :execresult
+INSERT IGNORE INTO ` + "`" + `destination` + "`" + ` (` + "`" + `source_id` + "`" + `, ` + "`" + `source_name` + "`" + `, ` + "`" + `value` + "`" + `)
+VALUES (?, ?, ?)
+`
+
+type SaveDestinationParams struct {
+	SourceID   int32
+	SourceName string
+	Value      string
+}
+
+func (q *Queries) SaveDestination(ctx context.Context, arg SaveDestinationParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, saveDestination, arg.SourceID, arg.SourceName, arg.Value)
 }

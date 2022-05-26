@@ -4,21 +4,27 @@
 
 package repository
 
-import (
-	"database/sql"
-)
+type Destination struct {
+	ID         int32
+	SourceID   int32
+	SourceName string
+	Value      string
+}
 
 type Primary struct {
 	ID    int32
-	Value sql.NullString
+	Name  string
+	Value string
 }
 
 type Secondary struct {
 	ID    int32
-	Value sql.NullString
+	Name  string
+	Value string
 }
 
 type Tertiary struct {
 	ID    int32
-	Value sql.NullString
+	Name  string
+	Value string
 }

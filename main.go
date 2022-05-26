@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal"
 	"os"
 	"plugin"
@@ -164,6 +165,8 @@ func getDB(config internal.MariaDB) *sql.DB {
 	if db == nil {
 		panic("unable to connect to the database")
 	}
+
+	fmt.Println("database connection has been successful...")
 
 	return db
 }

@@ -14,7 +14,7 @@ import (
 // Producer is a producer plugin symbol name.
 var Producer producer
 
-var errProducerPlugin = errors.New("consumer")
+var errProducerPlugin = errors.New("producer")
 
 type producer struct {
 	db      *sql.DB
@@ -113,13 +113,22 @@ func (p *producer) insert(value string) (string, error) {
 
 	switch p.name {
 	case "primary":
-		result, err = p.q.CreatePrimary(ctx, sql.NullString{String: value, Valid: true})
+		result, err = p.q.CreatePrimary(ctx, repository.CreatePrimaryParams{
+			Name: p.name,
+			Value: value,
+		})
 		break
 	case "secondary":
-		result, err = p.q.CreateSecondary(ctx, sql.NullString{String: value, Valid: true})
+		result, err = p.q.CreateSecondary(ctx,  repository.CreateSecondaryParams{
+			Name: p.name,
+			Value: value,
+		})
 		break
 	case "tertiary":
-		result, err = p.q.CreateTertiary(ctx, sql.NullString{String: value, Valid: true})
+		result, err = p.q.CreateTertiary(ctx,  repository.CreateTertiaryParams{
+			Name: p.name,
+			Value: value,
+		})
 		break
 	default:
 		return "", errors.Wrapf(errProducerPlugin, "unable to produce for %s", p.name)

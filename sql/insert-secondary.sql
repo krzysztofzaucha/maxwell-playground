@@ -1,1 +1,2 @@
-INSERT INTO `secondary`(`value`) VALUES ("Hello World!");
+INSERT INTO `secondary`(`name`, `value`)
+VALUES ("secondary", "Hello World!");

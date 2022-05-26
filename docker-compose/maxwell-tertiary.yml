@@ -16,6 +16,7 @@ services:
       - "USERNAME=maxwell"
       - "PASSWORD=password"
       - "PRODUCER=sqs"
+      - "IGNORE_PRODUCER_ERROR=false" # not sure if this actually has any effect... `config.properties` was edited too...
       - "REPLICA_SERVER_ID=3"
       - "SERVER_ID=tertiary"
       - "FILTER=exclude:*.*,include:example.tertiary"
@@ -25,6 +26,7 @@ services:
       - "AWS_ACCESS_KEY_ID=dummy"
       - "AWS_SECRET_ACCESS_KEY=dummy"
       - "AWS_REGION=eu-west-1"
+    restart: on-failure
 
 networks:
   default:

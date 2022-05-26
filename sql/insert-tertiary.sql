@@ -1,1 +1,2 @@
-INSERT INTO `tertiary`(`value`) VALUES ("Hello World!");
+INSERT INTO `tertiary`(`name`, `value`)
+VALUES ("tertiary", "Hello World!");

@@ -40,7 +40,7 @@ compose:
 		up --build # --remove-orphans # --force-recreate # --abort-on-container-exit
 
 up: ## Start the example
-	@COMPOSE=${ALL} make compose
+	@COMPOSE="${ALL}" make compose
 
 ###########
 # Testing #

@@ -1,0 +1,42 @@
+version: "3.9"
+
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+
+services:
+  elasticsearch:
+    build:
+      context: ../elasticsearch
+      dockerfile: Dockerfile
+    image: ${IMAGE_BASE_NAME}-elasticsearch:latest
+    container_name: ${BASE_NAME}-elasticsearch
+    environment:
+      - "node.name=elasticsearch"
+      - "cluster.initial_master_nodes=elasticsearch"
+      - "bootstrap.memory_lock=true"
+      - "xpack.security.enabled=false"
+      - "xpack.security.transport.ssl.enabled=false"
+      - "ELASTIC_PASSWORD=password"
+      - "KIBANA_PASSWORD=password"
+      - "LICENSE=basic"
+    volumes:
+      - "elasticsearch-data:/usr/share/elasticsearch/data"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+            "CMD-SHELL",
+            "curl -s https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+volumes:
+  elasticsearch-data:
+
+networks:
+  default:
+    name: ${NETWORK}

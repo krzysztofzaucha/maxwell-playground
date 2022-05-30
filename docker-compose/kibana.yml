@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  kibana:
+    build:
+      context: ../kibana
+      dockerfile: Dockerfile
+    image: ${IMAGE_BASE_NAME}-kibana:latest
+    container_name: ${BASE_NAME}-kibana
+    depends_on:
+      - elasticsearch
+    environment:
+      - "SERVERNAME=kibana"
+      - "ELASTICSEARCH_HOSTS=http://maxwell-sandbox-elasticsearch:9200"
+      - "ELASTICSEARCH_USERNAME=kibana_system"
+      - "ELASTICSEARCH_PASSWORD=password"
+    volumes:
+      - "kibana-data:/usr/share/kibana/data"
+    ports:
+      - "5601:5601"
+    healthcheck:
+      test:
+        [
+            "CMD-SHELL",
+            "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+volumes:
+  kibana-data:
+
+networks:
+  default:
+    name: ${NETWORK}

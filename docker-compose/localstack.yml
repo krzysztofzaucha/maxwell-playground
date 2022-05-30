@@ -2,27 +2,35 @@ version: "3.9"
 
 services:
   localstack:
-    image: localstack/localstack:latest
-    #ports:
-    #  - "4567-4584:4567-4584"
-    #  - "12000:8080"
+    build:
+      context: ../localstack
+      dockerfile: Dockerfile
+    image: ${IMAGE_BASE_NAME}-localstack:latest
     container_name: ${BASE_NAME}-localstack
     environment:
       - "SERVICES=sqs"
+      #- "SERVICES=sqs,es"
       - "DEBUG=true"
       - "DOCKER_HOST=unix:///var/run/docker.sock"
       - "DEFAULT_REGION=eu-west-1"
       - "HOSTNAME=${BASE_NAME}-localstack"
       - "HOSTNAME_EXTERNAL=${BASE_NAME}-localstack"
+      - "DATA_DIR=/var/localstack/data"
       # For aws cli
       - "AWS_ACCESS_KEY_ID=dummy"
       - "AWS_SECRET_ACCESS_KEY=dummy"
       - "AWS_REGION=eu-west-1"
+      #- "ES_DOMAIN=${BASE_NAME}"
+      #- "ES_INDEX_NAME=destination"
       # Maxwell specific env
       - "SQS_QUEUE_NAMES=maxwell-primary,maxwell-secondary,maxwell-tertiary"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ../sh/localstack.sh:/docker-entrypoint-initaws.d/localstack.sh
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "../sh/localstack.sh:/docker-entrypoint-initaws.d/localstack.sh"
+      - "localstack-data:/var/localstack/data"
+
+volumes:
+  localstack-data:
 
 networks:
   default:

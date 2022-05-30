@@ -12,5 +12,9 @@
     "accessKey" : "dummy",
     "secretAccessKey": "dummy",
     "queueURL": "http://maxwell-sandbox-localstack:4566/000000000000/maxwell-primary"
+  },
+  "es": {
+    "endpointURL": "http://maxwell-sandbox-elasticsearch:9200",
+    "indexName": "destination"
   }
 }

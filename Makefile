@@ -155,5 +155,9 @@ reset: ## Cleanup
 	@docker stop $(shell docker ps -aq) || true
 	@docker system prune || true
 	@docker volume rm $(shell docker volume ls -q) || true
+	@docker rmi -f ${IMAGE_BASE_NAME}-mariadb:latest || true
 	@docker rmi -f ${IMAGE_BASE_NAME}-maxwell:latest || true
 	@docker rmi -f ${IMAGE_BASE_NAME}-go:latest || true
+	@docker rmi -f ${IMAGE_BASE_NAME}-localstack:latest || true
+	@docker rmi -f ${IMAGE_BASE_NAME}-elasticsearch:latest || true
+	@docker rmi -f ${IMAGE_BASE_NAME}-kibana:latest || true

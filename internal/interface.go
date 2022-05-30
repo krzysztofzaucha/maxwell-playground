@@ -4,6 +4,7 @@ package internal
 import (
 	"database/sql"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/elastic/go-elasticsearch/v8"
 )
 
 // Executor is the main plugin method to execute plugins logic.
@@ -19,6 +20,11 @@ type SQLDBConfigurator interface {
 // SQSConfigurator is an interface for WithSQS.
 type SQSConfigurator interface {
 	WithSQS(sqs *sqs.SQS)
+}
+
+// ESConfigurator is an interface for WithES.
+type ESConfigurator interface {
+	WithES(sqs *elasticsearch.Client)
 }
 
 // ThreadsConfigurator is an interface for WithThreads.
@@ -44,4 +50,9 @@ type AmountConfigurator interface {
 // SQSQueueURLConfigurator is an interface for WithSQSQueueURL.
 type SQSQueueURLConfigurator interface {
 	WithSQSQueueURL(queue QueueURL)
+}
+
+// ESIndexNameConfigurator is an interface for WithESIndexName.
+type ESIndexNameConfigurator interface {
+	WithESIndexName(indexName IndexName)
 }

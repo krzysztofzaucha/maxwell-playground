@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal/repository"
 	"github.com/pkg/errors"
+	"log"
 	"sync"
 	"time"
 )
@@ -62,7 +63,7 @@ func (p *producer) Execute() error {
 
 	end := time.Since(start)
 
-	fmt.Printf("amount processed: %d, total execution time: %s\n", conns, end)
+	log.Printf("amount processed: %d, total execution time: %s\n", conns, end)
 
 	return nil
 }
@@ -82,14 +83,14 @@ func (p *producer) run(wait time.Duration, rc chan string, sem chan bool) {
 
 		select {
 		case sem <- true:
-			fmt.Printf("starting sem %d, amount counter %d ...\n", len(sem), counter)
+			log.Printf("starting sem %d, amount counter %d ...\n", len(sem), counter)
 
 			go func(rc chan string, sem chan bool, wg *sync.WaitGroup) {
 				defer wg.Done()
 
 				res, err := p.insert(fmt.Sprintf("value number %d", counter))
 				if err != nil {
-					fmt.Printf("%v", err)
+					log.Printf("%v", err)
 				}
 
 				time.Sleep(wait)
@@ -157,7 +158,7 @@ func (p *producer) getResult(rc chan string) int {
 			if ok {
 				conns++
 
-				fmt.Println(r)
+				log.Println(r)
 			} else {
 				return conns
 			}

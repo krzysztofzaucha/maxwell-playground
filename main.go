@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/elastic/go-elasticsearch/v8"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal"
 	"os"
@@ -108,6 +109,11 @@ func configureWith(
 		symbol.(internal.SQSConfigurator).WithSQS(getSQS(config.SQS))
 	}
 
+	// configure ES
+	if _, ok := symbol.(internal.ESConfigurator); ok {
+		symbol.(internal.ESConfigurator).WithES(getES(config.ES))
+	}
+
 	// configure threads
 	if _, ok := symbol.(internal.ThreadsConfigurator); ok {
 		symbol.(internal.ThreadsConfigurator).WithThreads(threads)
@@ -131,6 +137,11 @@ func configureWith(
 	// configure sqs queue
 	if _, ok := symbol.(internal.SQSQueueURLConfigurator); ok {
 		symbol.(internal.SQSQueueURLConfigurator).WithSQSQueueURL(config.SQS.QueueURL)
+	}
+
+	// configure es index
+	if _, ok := symbol.(internal.ESIndexNameConfigurator); ok {
+		symbol.(internal.ESIndexNameConfigurator).WithESIndexName(config.ES.IndexName)
 	}
 }
 
@@ -181,7 +192,18 @@ func getSQS(config internal.SQS) *sqs.SQS {
 		Endpoint: aws.String(config.EndpointURL),
 	}))
 
-	q := sqs.New(sess)
+	return sqs.New(sess)
+}
 
-	return q
+func getES(config internal.ES) *elasticsearch.Client {
+	es, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{
+			config.EndpointURL,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return es
 }

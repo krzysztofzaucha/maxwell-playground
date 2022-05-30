@@ -17,9 +17,17 @@ type SQS struct {
 	QueueURL        QueueURL `json:"queueURL"`
 }
 
+type ES struct {
+	EndpointURL     string    `json:"endpointURL"`
+	IndexName       IndexName `json:"indexName"`
+}
+
 type QueueURL string
+
+type IndexName string
 
 type Config struct {
 	MariaDB MariaDB `json:"mariaDB"`
 	SQS     SQS     `json:"sqs"`
+	ES      ES      `json:"es"`
 }

@@ -1,16 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal"
 	"github.com/krzysztofzaucha/maxwell-sandbox/internal/repository"
 	"github.com/pkg/errors"
+	"log"
 	"time"
 )
 
@@ -20,12 +24,14 @@ var Consumer consumer
 var errConsumerPlugin = errors.New("consumer")
 
 type consumer struct {
-	db       *sql.DB
-	q        *repository.Queries
-	sqs      *sqs.SQS
-	threads  int
-	wait     int
-	queueURL string
+	db        *sql.DB
+	q         *repository.Queries
+	sqs       *sqs.SQS
+	es        *elasticsearch.Client
+	threads   int
+	wait      int
+	queueURL  string
+	indexName string
 }
 
 func (c *consumer) WithSQLDB(db *sql.DB) error {
@@ -40,6 +46,10 @@ func (c *consumer) WithSQS(sqs *sqs.SQS) {
 	c.sqs = sqs
 }
 
+func (c *consumer) WithES(es *elasticsearch.Client) {
+	c.es = es
+}
+
 func (c *consumer) WithThreads(threads int) {
 	c.threads = threads
 }
@@ -52,6 +62,10 @@ func (c *consumer) WithSQSQueueURL(queueURL internal.QueueURL) {
 	c.queueURL = string(queueURL)
 }
 
+func (c *consumer) WithESIndexName(indexName internal.IndexName) {
+	c.indexName = string(indexName)
+}
+
 // Execute method executes plugin logic.
 func (c *consumer) Execute() error {
 	for {
@@ -61,7 +75,7 @@ func (c *consumer) Execute() error {
 		})
 
 		if err != nil {
-			fmt.Printf("unable to connect to %s sqs queue: %v: retrying...\n", c.queueURL, err)
+			log.Printf("unable to connect to %s sqs queue: %v: retrying...\n", c.queueURL, err)
 			time.Sleep(time.Duration(3) * time.Second)
 
 			continue
@@ -91,7 +105,7 @@ func (c *consumer) run(delay time.Duration, sem chan bool) {
 					MessageAttributeNames: aws.StringSlice([]string{"All"}),
 				})
 				if err != nil {
-					fmt.Printf("%v", err)
+					log.Printf("%v", err)
 
 					<-sem
 
@@ -107,7 +121,7 @@ func (c *consumer) run(delay time.Duration, sem chan bool) {
 
 				err = c.process(messages.Messages[0])
 				if err != nil {
-					fmt.Printf("%v", err)
+					log.Printf("%v", err)
 
 					<-sem
 
@@ -123,8 +137,6 @@ func (c *consumer) run(delay time.Duration, sem chan bool) {
 }
 
 func (c *consumer) process(message *sqs.Message) error {
-	ctx := context.Background()
-
 	var msg map[string]interface{}
 
 	err := json.Unmarshal([]byte(*message.Body), &msg)
@@ -132,26 +144,66 @@ func (c *consumer) process(message *sqs.Message) error {
 		return errors.Wrapf(errConsumerPlugin, "%s", err)
 	}
 
+	doc := map[string]interface{}{
+		"doc":           &msg,
+		"doc_as_upsert": true,
+	}
+
+	d, err := json.Marshal(doc)
+	if err != nil {
+		return errors.Wrapf(errConsumerPlugin, "%s", err)
+	}
+
 	data := msg["data"].(map[string]interface{})
 
-	result, err := c.q.SaveDestination(ctx, repository.SaveDestinationParams{
-		SourceID:   int32(data["id"].(float64)),
-		SourceName: data["name"].(string),
-		Value:      data["value"].(string),
-	})
+	log.Printf("data.id: %v\n", data["id"])
+
+	docID := fmt.Sprintf("%v-%v", data["id"], data["name"])
+
+	req := esapi.UpdateRequest{
+		Index:           c.indexName,
+		DocumentID:      docID,
+		Body:            bytes.NewReader(d),
+		Refresh:         "true",
+		RetryOnConflict: func(v int) *int { return &v }(5),
+	}
+
+	res, err := req.Do(context.Background(), c.es)
+
 	if err != nil {
 		return errors.Wrapf(errConsumerPlugin, "%s", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return errors.Wrapf(errConsumerPlugin, "%s", err)
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	if res.IsError() {
+		return errors.Wrapf(errConsumerPlugin,
+			"[%s] error indexing document id=%s %s", res.Status(), docID, res.String(),
+		)
 	}
 
-	fmt.Printf(
-		"message has been successfully processed: %s, stored in the destination with id %d\n",
-		*message.Body, id,
-	)
+	//result, err := c.q.SaveDestination(ctx, repository.SaveDestinationParams{
+	//	SourceID:   int32(data["id"].(float64)),
+	//	SourceName: data["name"].(string),
+	//	Value:      data["value"].(string),
+	//})
+	//if err != nil {
+	//	return errors.Wrapf(errConsumerPlugin, "%s", err)
+	//}
+	//
+	//id, err := result.LastInsertId()
+	//if err != nil {
+	//	return errors.Wrapf(errConsumerPlugin, "%s", err)
+	//}
+	//
+	//log.Printf(
+	//	"message has been successfully processed: %s, stored in the destination with id %d\n",
+	//	*message.Body, id,
+	//)
 
 	params := &sqs.DeleteMessageInput{
 		QueueUrl:      aws.String(c.queueURL),
@@ -160,7 +212,7 @@ func (c *consumer) process(message *sqs.Message) error {
 
 	_, err = c.sqs.DeleteMessage(params)
 	if err != nil {
-		fmt.Printf("unable to proccess sqs message: %v\n", err)
+		log.Printf("unable to proccess sqs message: %v\n", err)
 	}
 
 	return nil

@@ -23,4 +23,4 @@ done
 
 #curl -sS -XGET "${ENDPOINT}/_cat/indices"
 
-bin/app
+bin/app "$@"

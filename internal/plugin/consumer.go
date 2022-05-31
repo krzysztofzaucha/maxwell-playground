@@ -98,10 +98,10 @@ func (c *consumer) run(delay time.Duration, sem chan bool) {
 		case sem <- true:
 			go func(sem chan bool) {
 				messages, err := c.sqs.ReceiveMessage(&sqs.ReceiveMessageInput{
-					QueueUrl:              aws.String(c.queueURL),
-					MaxNumberOfMessages:   aws.Int64(1),
-					WaitTimeSeconds:       aws.Int64(20),
-					VisibilityTimeout:     aws.Int64(20),
+					QueueUrl:            aws.String(c.queueURL),
+					MaxNumberOfMessages: aws.Int64(1),
+					//WaitTimeSeconds:       aws.Int64(1),
+					//VisibilityTimeout:     aws.Int64(10),
 					MessageAttributeNames: aws.StringSlice([]string{"All"}),
 				})
 				if err != nil {
@@ -169,7 +169,6 @@ func (c *consumer) process(message *sqs.Message) error {
 	}
 
 	res, err := req.Do(context.Background(), c.es)
-
 	if err != nil {
 		return errors.Wrapf(errConsumerPlugin, "%s", err)
 	}
@@ -212,7 +211,7 @@ func (c *consumer) process(message *sqs.Message) error {
 
 	_, err = c.sqs.DeleteMessage(params)
 	if err != nil {
-		log.Printf("unable to proccess sqs message: %v\n", err)
+		log.Printf("unable to delete sqs message: data.id: %d: %v\n", data["id"], err)
 	}
 
 	return nil

@@ -15,7 +15,7 @@ services:
       - "DEFAULT_REGION=eu-west-1"
       - "HOSTNAME=${BASE_NAME}-localstack"
       - "HOSTNAME_EXTERNAL=${BASE_NAME}-localstack"
-      - "DATA_DIR=/var/localstack/data"
+      #- "DATA_DIR=/var/localstack/data"
       # For aws cli
       - "AWS_ACCESS_KEY_ID=dummy"
       - "AWS_SECRET_ACCESS_KEY=dummy"
@@ -27,10 +27,11 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "../sh/localstack.sh:/docker-entrypoint-initaws.d/localstack.sh"
-      - "localstack-data:/var/localstack/data"
+      # Persistent data directory causes "Waiting for all LocalStack services to be ready" error.
+      #- "localstack-data:/var/localstack/data"
 
-volumes:
-  localstack-data:
+#volumes:
+#  localstack-data:
 
 networks:
   default:

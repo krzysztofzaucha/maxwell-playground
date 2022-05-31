@@ -149,7 +149,7 @@ func getDB(config internal.MariaDB) *sql.DB {
 	var db *sql.DB
 	var err error
 
-	for i := 0; i < retries; i++ {
+	for i := 1; i < retries; i++ {
 		fmt.Printf("connecting to the database, attempt number %d\n", i)
 
 		db, err = sql.Open("mysql", fmt.Sprintf(

@@ -17,7 +17,7 @@ RUN apt-get update \
     && rm -R -f /app/lib/aws-java-sdk-sqs-*.jar \
     && rm -R -f /app/lib/maxwell-*.jar
 
-CMD bin/maxwell --user=${MYSQL_USER} --password=MYSQL_PASSWORD --host=${MYSQL_HOST}-mariadb --producer=stdout
+CMD bin/maxwell --user=${USERNAME} --password=${PASSWORD} --host=${MYSQL_HOST} --producer=${PRODUCER}
 
 ADD config.properties /app/config.properties
 ADD lib/aws-java-sdk-core-1.12.213.jar /app/lib/aws-java-sdk-core-1.12.213.jar

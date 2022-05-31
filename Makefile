@@ -6,9 +6,9 @@ export IMAGE_BASE_NAME:=kz/$(shell basename ${PWD})
 export NETWORK:=${BASE_NAME}-network
 export PRODUCER_THREADS:=1 # number of threads
 export CONSUMER_THREADS:=1 # number of threads
-export PRODUCER_WAIT:=5000 # step waiting time in milliseconds
-export CONSUMER_WAIT:=100 # step waiting time in milliseconds
-export TOTAL:=10000 # number of events per events type
+export PRODUCER_WAIT:=10 # step waiting time in milliseconds
+export CONSUMER_WAIT:=10 # step waiting time in milliseconds
+export TOTAL:=100 # number of events per events type
 
 default: help
 
@@ -39,7 +39,7 @@ ALL:=\
 compose:
 	@docker-compose ${COMPOSE} \
 		-p ${BASE_NAME} \
-		up --build # --remove-orphans # --force-recreate # --abort-on-container-exit
+		up # --build # --remove-orphans # --force-recreate # --abort-on-container-exit
 
 up: ## Start the example
 	@COMPOSE="${ALL}" make compose
@@ -52,8 +52,6 @@ TEST:=\
 	-f docker-compose/mariadb.yml \
 	-f docker-compose/localstack.yml \
 	-f docker-compose/maxwell-primary.yml \
-	-f docker-compose/producer-primary.yml \
-	-f docker-compose/consumer-primary.yml \
 	-f docker-compose/elasticsearch.yml \
 	-f docker-compose/kibana.yml
 
@@ -121,6 +119,12 @@ build: plugins ## Compile
 
 aws-sqs-list-queues: ## List all queues
 	@docker exec -it ${BASE_NAME}-localstack awslocal sqs list-queues --region=eu-west-1
+
+aws-sqs-get-queue-attributes-maxwell-primary: ## Get maxwell-primary queue attributes
+	@docker exec -it ${BASE_NAME}-localstack awslocal sqs get-queue-attributes \
+		--queue-url=http://${BASE_NAME}-localstack:4566/queue/maxwell-primary \
+		--region=eu-west-1 \
+		--attribute-names=ApproximateNumberOfMessages
 
 aws-sqs-send-message-maxwell-primary: ## Send message to the maxwell-primary queue
 	@docker exec -it ${BASE_NAME}-localstack awslocal sqs send-message \

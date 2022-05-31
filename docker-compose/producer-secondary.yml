@@ -4,7 +4,7 @@ services:
   producer-secondary:
     build:
       context: ../
-      dockerfile: go/Dockerfile
+      dockerfile: Dockerfile
       target: final
     image: ${IMAGE_BASE_NAME}-go:latest
     container_name: ${BASE_NAME}-producer-secondary

@@ -18,13 +18,15 @@ type SQS struct {
 }
 
 type ES struct {
-	EndpointURL     string    `json:"endpointURL"`
-	IndexName       IndexName `json:"indexName"`
+	Protocol string `json:"protocol"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Name     Name   `json:"name"`
 }
 
 type QueueURL string
 
-type IndexName string
+type Name string
 
 type Config struct {
 	MariaDB MariaDB `json:"mariaDB"`

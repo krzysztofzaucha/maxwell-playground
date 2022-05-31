@@ -7,9 +7,9 @@ services:
       dockerfile: Dockerfile
     image: ${IMAGE_BASE_NAME}-maxwell:latest
     container_name: ${BASE_NAME}-maxwell-primary
-    #depends_on:
-    #  - mariadb
-    #  - localstack
+    depends_on:
+      - mariadb
+      - localstack
     environment:
       - "HOST=${BASE_NAME}-mariadb"
       - "PORT=3306"

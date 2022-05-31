@@ -32,7 +32,9 @@ ALL:=\
 	-f docker-compose/producer-tertiary.yml \
 	-f docker-compose/consumer-primary.yml \
 	-f docker-compose/consumer-secondary.yml \
-	-f docker-compose/consumer-tertiary.yml
+	-f docker-compose/consumer-tertiary.yml \
+	-f docker-compose/elasticsearch.yml \
+	-f docker-compose/kibana.yml
 
 compose:
 	@docker-compose ${COMPOSE} \
@@ -45,6 +47,18 @@ up: ## Start the example
 ###########
 # Testing #
 ###########
+
+TEST:=\
+	-f docker-compose/mariadb.yml \
+	-f docker-compose/localstack.yml \
+	-f docker-compose/maxwell-primary.yml \
+	-f docker-compose/producer-primary.yml \
+	-f docker-compose/consumer-primary.yml \
+	-f docker-compose/elasticsearch.yml \
+	-f docker-compose/kibana.yml
+
+test: ## Start the minimum required for testing
+	@COMPOSE="${TEST}" make compose
 
 mariadb-up: ## Start MariaDB
 	@COMPOSE=" -f docker-compose/mariadb.yml" make compose
@@ -60,6 +74,9 @@ producer-primary-up: ## Start Producer Primary
 
 consumer-primary-up: ## Start Consumer Primary
 	@COMPOSE=" -f docker-compose/consumer-primary.yml" make compose
+
+elasticsearch-kibana-up: ## Start ElasticSearch and Kibana
+	@COMPOSE=" -f docker-compose/elasticsearch.yml -f docker-compose/kibana.yml" make compose
 
 ###########
 # MariaDB #

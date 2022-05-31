@@ -4,12 +4,12 @@ services:
   producer-primary:
     build:
       context: ../
-      dockerfile: go/Dockerfile
+      dockerfile: Dockerfile
       target: final
     image: ${IMAGE_BASE_NAME}-go:latest
     container_name: ${BASE_NAME}-producer-primary
-    #depends_on:
-    #  - mariadb
+    depends_on:
+      - mariadb
     volumes:
       - "../config/primary.json:/opt/app/config.json"
     command: --config=config.json --module=producer --threads=${PRODUCER_THREADS} --wait=${PRODUCER_WAIT} --name=primary --total=${TOTAL}

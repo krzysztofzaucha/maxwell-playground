@@ -6,7 +6,13 @@ To run this example **Docker** installation is required.
 
 More detailed documentation of the **Maxwell** daemon can be found [here](https://maxwells-daemon.io/).
 
-## Diagram
+## Diagrams
+
+#### Abstract example
+
+![](diagram/example.svg)
+
+#### ElasticSearch example
 
 ![](diagram/flow.svg)
 

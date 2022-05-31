@@ -13,9 +13,14 @@ RUN go build -o bin/app .
 
 FROM alpine:latest as final
 
+RUN apk update \
+    && apk add curl jq
+
 WORKDIR /opt/app
 
 COPY --from=builder /opt/app/bin /opt/app/bin
+
+ADD entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["bin/app"]
 

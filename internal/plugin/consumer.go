@@ -24,14 +24,14 @@ var Consumer consumer
 var errConsumerPlugin = errors.New("consumer")
 
 type consumer struct {
-	db        *sql.DB
-	q         *repository.Queries
-	sqs       *sqs.SQS
-	es        *elasticsearch.Client
-	threads   int
-	wait      int
-	queueURL  string
-	indexName string
+	db       *sql.DB
+	q        *repository.Queries
+	sqs      *sqs.SQS
+	es       *elasticsearch.Client
+	threads  int
+	wait     int
+	queueURL string
+	name     string
 }
 
 func (c *consumer) WithSQLDB(db *sql.DB) error {
@@ -62,8 +62,8 @@ func (c *consumer) WithSQSQueueURL(queueURL internal.QueueURL) {
 	c.queueURL = string(queueURL)
 }
 
-func (c *consumer) WithESIndexName(indexName internal.IndexName) {
-	c.indexName = string(indexName)
+func (c *consumer) WithESName(name internal.Name) {
+	c.name = string(name)
 }
 
 // Execute method executes plugin logic.
@@ -161,7 +161,7 @@ func (c *consumer) process(message *sqs.Message) error {
 	docID := fmt.Sprintf("%v-%v", data["id"], data["name"])
 
 	req := esapi.UpdateRequest{
-		Index:           c.indexName,
+		Index:           c.name,
 		DocumentID:      docID,
 		Body:            bytes.NewReader(d),
 		Refresh:         "true",

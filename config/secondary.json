@@ -14,7 +14,9 @@
     "queueURL": "http://maxwell-sandbox-localstack:4566/000000000000/maxwell-secondary"
   },
   "es": {
-    "endpointURL": "http://maxwell-sandbox-elasticsearch:9200",
-    "indexName": "destination"
+    "protocol": "http",
+    "host": "maxwell-sandbox-elasticsearch",
+    "port": 9200,
+    "name": "destination"
   }
 }

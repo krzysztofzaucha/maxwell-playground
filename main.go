@@ -140,8 +140,8 @@ func configureWith(
 	}
 
 	// configure es index
-	if _, ok := symbol.(internal.ESIndexNameConfigurator); ok {
-		symbol.(internal.ESIndexNameConfigurator).WithESIndexName(config.ES.IndexName)
+	if _, ok := symbol.(internal.ESNameConfigurator); ok {
+		symbol.(internal.ESNameConfigurator).WithESName(config.ES.Name)
 	}
 }
 
@@ -198,7 +198,7 @@ func getSQS(config internal.SQS) *sqs.SQS {
 func getES(config internal.ES) *elasticsearch.Client {
 	es, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{
-			config.EndpointURL,
+			fmt.Sprintf("%s://%s:%d", config.Protocol, config.Host, config.Port),
 		},
 	})
 	if err != nil {

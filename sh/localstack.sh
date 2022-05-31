@@ -31,9 +31,9 @@ done
 #    sleep 5
 #done
 #
-##curl -sS -X GET "${ES_DOMAIN}.eu-west-1.es.localhost.localstack.cloud:4566/_cluster/health" | jq
-#curl -sS -X GET "${HOSTNAME_EXTERNAL}:4566/${ES_DOMAIN}/_cluster/health" | jq
-##curl -sS -X PUT "${ES_DOMAIN}.eu-west-1.es.localhost.localstack.cloud:4566/destination" | jq
-#curl -sS -X PUT "${HOSTNAME_EXTERNAL}:4566/${ES_DOMAIN}/destination" | jq
-##curl -sS -X GET "${ES_DOMAIN}.eu-west-1.es.localhost.localstack.cloud:4566/_cat/indices"
-#curl -sS -X GET "${HOSTNAME_EXTERNAL}:4566/${ES_DOMAIN}/_cat/indices"
+##curl -sS -XGET "${ES_DOMAIN}.eu-west-1.es.localhost.localstack.cloud:4566/_cluster/health" | jq
+#curl -sS -XGET "${HOSTNAME_EXTERNAL}:4566/${ES_DOMAIN}/_cluster/health" | jq
+##curl -sS -XPUT "${ES_DOMAIN}.eu-west-1.es.localhost.localstack.cloud:4566/destination" | jq
+#curl -sS -XPUT "${HOSTNAME_EXTERNAL}:4566/${ES_DOMAIN}/destination" | jq
+##curl -sS -XGET "${ES_DOMAIN}.eu-west-1.es.localhost.localstack.cloud:4566/_cat/indices"
+#curl -sS -XGET "${HOSTNAME_EXTERNAL}:4566/${ES_DOMAIN}/_cat/indices"

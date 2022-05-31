@@ -52,7 +52,7 @@ type SQSQueueURLConfigurator interface {
 	WithSQSQueueURL(queue QueueURL)
 }
 
-// ESIndexNameConfigurator is an interface for WithESIndexName.
-type ESIndexNameConfigurator interface {
-	WithESIndexName(indexName IndexName)
+// ESNameConfigurator is an interface for WithESName.
+type ESNameConfigurator interface {
+	WithESName(name Name)
 }

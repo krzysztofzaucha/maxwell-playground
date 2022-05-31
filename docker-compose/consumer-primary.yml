@@ -4,14 +4,16 @@ services:
   consumer-primary:
     build:
       context: ../
-      dockerfile: go/Dockerfile
+      dockerfile: Dockerfile
       target: final
     image: ${IMAGE_BASE_NAME}-go:latest
     container_name: ${BASE_NAME}-consumer-primary
-    #depends_on:
-    #  - localstack
+    depends_on:
+      - localstack
+      - elasticsearch
     volumes:
       - "../config/primary.json:/opt/app/config.json"
+    entrypoint: "/entrypoint.sh"
     command: --config=config.json --module=consumer --threads=${CONSUMER_THREADS} --wait=${CONSUMER_WAIT}
 
 networks:

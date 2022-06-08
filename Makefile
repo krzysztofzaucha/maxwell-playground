@@ -21,42 +21,42 @@ help: ## Prints help for targets with comments
 # Run #
 #######
 
-ALL:=\
+BASE:=\
 	-f docker-compose/mariadb.yml \
 	-f docker-compose/localstack.yml \
 	-f docker-compose/maxwell-primary.yml \
 	-f docker-compose/maxwell-secondary.yml \
 	-f docker-compose/maxwell-tertiary.yml \
-	-f docker-compose/producer-primary.yml \
-	-f docker-compose/producer-secondary.yml \
-	-f docker-compose/producer-tertiary.yml \
-	-f docker-compose/consumer-primary.yml \
-	-f docker-compose/consumer-secondary.yml \
-	-f docker-compose/consumer-tertiary.yml \
 	-f docker-compose/elasticsearch.yml \
 	-f docker-compose/kibana.yml
+
+CONSUMERS:=\
+	-f docker-compose/consumer-primary.yml \
+	-f docker-compose/consumer-secondary.yml \
+	-f docker-compose/consumer-tertiary.yml
+
+PRODUCERS:=\
+	-f docker-compose/producer-primary.yml \
+	-f docker-compose/producer-secondary.yml \
+	-f docker-compose/producer-tertiary.yml
 
 compose:
 	@docker-compose ${COMPOSE} \
 		-p ${BASE_NAME} \
 		up # --build # --remove-orphans # --force-recreate # --abort-on-container-exit
 
-up: ## Start the example
-	@COMPOSE="${ALL}" make compose
+up-base: ## Start the example
+	@COMPOSE="${BASE}" make compose
+
+up-consumers: ## Start consumers
+	@COMPOSE="${CONSUMERS}" make compose
+
+up-producers: ## Start producers
+	@COMPOSE="${PRODUCERS}" make compose
 
 ###########
 # Testing #
 ###########
-
-TEST:=\
-	-f docker-compose/mariadb.yml \
-	-f docker-compose/localstack.yml \
-	-f docker-compose/maxwell-primary.yml \
-	-f docker-compose/elasticsearch.yml \
-	-f docker-compose/kibana.yml
-
-test: ## Start the minimum required for testing
-	@COMPOSE="${TEST}" make compose
 
 mariadb-up: ## Start MariaDB
 	@COMPOSE=" -f docker-compose/mariadb.yml" make compose
@@ -70,7 +70,7 @@ maxwell-primary-up: ## Start Maxwell Primary
 producer-primary-up: ## Start Producer Primary
 	@COMPOSE=" -f docker-compose/producer-primary.yml" make compose
 
-consumer-primary-up: ## Start Consumer Primary
+consumers-primary-up: ## Start Consumer Primary
 	@COMPOSE=" -f docker-compose/consumer-primary.yml" make compose
 
 elasticsearch-kibana-up: ## Start ElasticSearch and Kibana

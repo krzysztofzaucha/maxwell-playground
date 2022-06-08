@@ -175,7 +175,7 @@ func (c *consumer) process(message *sqs.Message) error {
 
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			panic(err)
+			panic(err.(any))
 		}
 	}()
 

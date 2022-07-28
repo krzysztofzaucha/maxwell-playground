@@ -1,6 +1,6 @@
 {
   "mariaDB": {
-    "host": "maxwell-sandbox-mariadb",
+    "host": "maxwell-playground-mariadb",
     "port": 3306,
     "username": "root",
     "password": "password",
@@ -8,14 +8,14 @@
   },
   "sqs": {
     "region": "eu-west-1",
-    "endpointURL": "http://maxwell-sandbox-localstack:4566",
+    "endpointURL": "http://maxwell-playground-localstack:4566",
     "accessKey" : "dummy",
     "secretAccessKey": "dummy",
-    "queueURL": "http://maxwell-sandbox-localstack:4566/000000000000/maxwell-tertiary"
+    "queueURL": "http://maxwell-playground-localstack:4566/000000000000/maxwell-tertiary"
   },
   "es": {
     "protocol": "http",
-    "host": "maxwell-sandbox-elasticsearch",
+    "host": "maxwell-playground-elasticsearch",
     "port": 9200,
     "name": "destination"
   }

@@ -1,4 +1,4 @@
-# Maxwell Sandbox
+# Maxwell Playground
 
 This repository contains basic **MariaDB**, **Maxwell** and **AWS** **SQS** [localstack](https://localstack.cloud/) configuration.
 

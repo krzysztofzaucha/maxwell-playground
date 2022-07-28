@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/krzysztofzaucha/maxwell-sandbox/internal/repository"
+	"github.com/krzysztofzaucha/maxwell-playground/internal/repository"
 	"github.com/pkg/errors"
 	"log"
 	"sync"
@@ -115,19 +115,19 @@ func (p *producer) insert(value string) (string, error) {
 	switch p.name {
 	case "primary":
 		result, err = p.q.CreatePrimary(ctx, repository.CreatePrimaryParams{
-			Name: p.name,
+			Name:  p.name,
 			Value: value,
 		})
 		break
 	case "secondary":
-		result, err = p.q.CreateSecondary(ctx,  repository.CreateSecondaryParams{
-			Name: p.name,
+		result, err = p.q.CreateSecondary(ctx, repository.CreateSecondaryParams{
+			Name:  p.name,
 			Value: value,
 		})
 		break
 	case "tertiary":
-		result, err = p.q.CreateTertiary(ctx,  repository.CreateTertiaryParams{
-			Name: p.name,
+		result, err = p.q.CreateTertiary(ctx, repository.CreateTertiaryParams{
+			Name:  p.name,
 			Value: value,
 		})
 		break

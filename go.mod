@@ -1,4 +1,4 @@
-module github.com/krzysztofzaucha/maxwell-sandbox
+module github.com/krzysztofzaucha/maxwell-playground
 
 go 1.17
 

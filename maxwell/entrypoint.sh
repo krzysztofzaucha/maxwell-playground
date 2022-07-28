@@ -29,16 +29,16 @@ bin/maxwell \
 
 # Start and subscribe to maxwell queue
 #bin/maxwell \
-#  --host="maxwell-sandbox-mariadb" \
+#  --host="maxwell-playground-mariadb" \
 #  --port="3306" \
 #  --user="maxwell" \
 #  --password="password" \
 #  --producer="sqs" \
-#  --sqs_queue_uri="maxwell-sandbox-localstack:4566/queue/maxwell"
+#  --sqs_queue_uri="maxwell-playground-localstack:4566/queue/maxwell"
 
 # Start and use stdout as an output
 #bin/maxwell \
-#  --host="maxwell-sandbox-mariadb" \
+#  --host="maxwell-playground-mariadb" \
 #  --port="3306" \
 #  --user="root" \
 #  --password="password" \
@@ -46,26 +46,26 @@ bin/maxwell \
 
 # Use the following to test the localstack
 #aws sqs send-message \
-#  --endpoint-url="http://maxwell-sandbox-localstack:4566" \
-#  --queue-url="http://maxwell-sandbox-localstack:4566/queue/maxwell" \
+#  --endpoint-url="http://maxwell-playground-localstack:4566" \
+#  --queue-url="http://maxwell-playground-localstack:4566/queue/maxwell" \
 #  --region=eu-west-1 \
 #  --message-body="Hello world!"
 
 # Use to test message receive
 #aws sqs receive-message \
-#   --endpoint-url="http://maxwell-sandbox-localstack:4566" \
+#   --endpoint-url="http://maxwell-playground-localstack:4566" \
 #	  --queue-url="http://${BASE_NAME}-localstack:4566/queue/maxwell" \
 #	  --region=eu-west-1
 
 # Delete queue
 #aws sqs delete-queue \
-#   --endpoint-url="http://maxwell-sandbox-localstack:4566" \
+#   --endpoint-url="http://maxwell-playground-localstack:4566" \
 #   --queue-url="http://${BASE_NAME}-localstack:4566/queue/maxwell" \
 #   --region=eu-west-1
 
 # Use to test waiting loop
 #until aws sqs receive-message \
-#  --endpoint-url="http://maxwell-sandbox-localstack:4566" \
+#  --endpoint-url="http://maxwell-playground-localstack:4566" \
 #  --queue-url="http://${SQS_QUEUE_URI}" \
 #  --region=eu-west-1; do
 #    >&2 echo "waiting for SQS to be ready..."

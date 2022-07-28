@@ -11,7 +11,7 @@ services:
       - elasticsearch
     environment:
       - "SERVERNAME=kibana"
-      - "ELASTICSEARCH_HOSTS=http://maxwell-sandbox-elasticsearch:9200"
+      - "ELASTICSEARCH_HOSTS=http://maxwell-playground-elasticsearch:9200"
       - "ELASTICSEARCH_USERNAME=kibana_system"
       - "ELASTICSEARCH_PASSWORD=password"
     volumes:

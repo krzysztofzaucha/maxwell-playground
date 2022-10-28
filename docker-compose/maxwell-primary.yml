@@ -22,10 +22,13 @@ services:
       - "FILTER=exclude:*.*,include:example.primary"
       - "ENDPOINT_URL=http://${BASE_NAME}-localstack:4566"
       - "SQS_QUEUE_URI=http://${BASE_NAME}-localstack:4566/000000000000/maxwell-primary"
+      - "JAVASCRIPT_FILE=js/filter.js"
       # For aws cli
       - "AWS_ACCESS_KEY_ID=dummy"
       - "AWS_SECRET_ACCESS_KEY=dummy"
       - "AWS_REGION=eu-west-1"
+    volumes:
+      - "../js/filter.js:/app/js/filter.js"
     restart: on-failure
 
 networks:

@@ -25,7 +25,8 @@ bin/maxwell \
   --producer="${PRODUCER}" \
   --sqs_service_endpoint="${ENDPOINT_URL}" \
   --sqs_signing_region="${AWS_REGION}" \
-  --sqs_queue_uri="${SQS_QUEUE_URI}"
+  --sqs_queue_uri="${SQS_QUEUE_URI}" \
+  --javascript="${JAVASCRIPT_FILE}"
 
 # Start and subscribe to maxwell queue
 #bin/maxwell \

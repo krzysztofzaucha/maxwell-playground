@@ -20,9 +20,6 @@ RUN apt-get update \
 CMD bin/maxwell --user=${USERNAME} --password=${PASSWORD} --host=${MYSQL_HOST} --producer=${PRODUCER}
 
 ADD config.properties /app/config.properties
-ADD lib/aws-java-sdk-core-1.12.213.jar /app/lib/aws-java-sdk-core-1.12.213.jar
-ADD lib/aws-java-sdk-sqs-1.12.213.jar /app/lib/aws-java-sdk-sqs-1.12.213.jar
-ADD lib/maxwell-1.37.5.jar /app/lib/maxwell-1.37.5.jar
 ADD entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh

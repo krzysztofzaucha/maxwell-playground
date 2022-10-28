@@ -84,13 +84,13 @@ mariadb: ## Access MariaDB shell
 	@docker exec -it ${BASE_NAME}-mariadb mysql -uroot -ppassword
 
 mariadb-insert-primary: ## Insert example row to `example`.`primary` table
-	@docker exec -it ${BASE_NAME}-mariadb sh -c "mysql -uroot -ppassword example < /mnt/insert-primary.sql"
+	@docker exec -it ${BASE_NAME}-mariadb sh -c "mysql -uroot -ppassword example < /mnt/20-insert-primary.sql"
 
 mariadb-insert-secondary: ## Insert example row to `example`.`secondary` table
-	@docker exec -it ${BASE_NAME}-mariadb sh -c "mysql -uroot -ppassword example < /mnt/insert-secondary.sql"
+	@docker exec -it ${BASE_NAME}-mariadb sh -c "mysql -uroot -ppassword example < /mnt/20-insert-secondary.sql"
 
 mariadb-insert-tertiary: ## Insert example row to `example`.`tertiary` table
-	@docker exec -it ${BASE_NAME}-mariadb sh -c "mysql -uroot -ppassword example < /mnt/insert-tertiary.sql"
+	@docker exec -it ${BASE_NAME}-mariadb sh -c "mysql -uroot -ppassword example < /mnt/20-insert-tertiary.sql"
 
 ########
 # SQLC #

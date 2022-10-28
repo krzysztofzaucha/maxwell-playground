@@ -32,7 +32,8 @@ Use the following environment variable located in the `Makefile` to control numb
 
 ## Instructions
 
-- Run `make up` to start everything up (this will also start consumers and producers).
+- Run `make up-base` to start everything up (this will also start consumers and producers).
 - Run `make mariadb` to access database shell, run the below example SQL queries to create records.
 - Run `make mariadb-insert-primary`, `make mariadb-insert-secondary` or `make mariadb-insert-tertiary` to insert database records manually.
 - Run e.g. `make aws-sqs-receive-message-maxwell-primary` to consume primary queue (run `make` to see more options).
+- Run `make up-consumers` and `make up-producers` after `make up-base` to run producers and consumers.
